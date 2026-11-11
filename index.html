@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고양이 기억력 게임</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #fff5eb;
+    text-align: center;
+    padding: 25px;
+  }
+
+  h1 { color: #70452e; }
+
+  #cards {
+    display: grid;
+    grid-template-columns: repeat(2, 120px);
+    gap: 15px;
+    justify-content: center;
+    margin: 30px auto;
+  }
+
+  .card {
+    height: 120px;
+    border: none;
+    border-radius: 18px;
+    background: #e9a96e;
+    font-size: 48px;
+    cursor: pointer;
+  }
+
+  .card.open {
+    background: white;
+  }
+
+  button#restart {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
+    background: #70452e;
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+  }
+
+  #message {
+    font-size: 20px;
+    color: #70452e;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>🐱 고양이 기억력 게임</h1>
+<p>같은 그림 두 장을 찾아보세요!</p>
+
+<p>시도 횟수: <span id="count">0</span></p>
+
+<div id="cards"></div>
+
+<p id="message">카드를 눌러보세요!</p>
+
+<button id="restart" onclick="startGame()">다시 시작</button>
+
+<script>
+const animals = ["🐱", "🐶", "🐱", "🐶"];
+
+let firstCard = null;
+let secondCard = null;
+let locked = false;
+let count = 0;
+let matched = 0;
+
+function startGame() {
+  const shuffled = [...animals].sort(() => Math.random() - 0.5);
+
+  firstCard = null;
+  secondCard = null;
+  locked = false;
+  count = 0;
+  matched = 0;
+
+  document.getElementById("count").textContent = count;
+  document.getElementById("message").textContent =
+    "카드를 눌러보세요!";
+
+  const area = document.getElementById("cards");
+  area.innerHTML = "";
+
+  shuffled.forEach(animal => {
+    const card = document.createElement("button");
+    card.className = "card";
+    card.textContent = "❓";
+    card.dataset.animal = animal;
+
+    card.addEventListener("click", () => flipCard(card));
+
+    area.appendChild(card);
+  });
+}
+
+function flipCard(card) {
+  if (locked || card.classList.contains("open")) return;
+
+  card.classList.add("open");
+  card.textContent = card.dataset.animal;
+
+  if (!firstCard) {
+    firstCard = card;
+    return;
+  }
+
+  secondCard = card;
+  count++;
+  document.getElementById("count").textContent = count;
+
+  if (firstCard.dataset.animal === secondCard.dataset.animal) {
+    matched++;
+    firstCard = null;
+    secondCard = null;
+
+    if (matched === 2) {
+      document.getElementById("message").textContent =
+        "🎉 성공! 모든 짝을 찾았어요!";
+    } else {
+      document.getElementById("message").textContent =
+        "참 잘했어요! 다음 짝을 찾아보세요.";
+    }
+  } else {
+    locked = true;
+
+    setTimeout(() => {
+      firstCard.classList.remove("open");
+      secondCard.classList.remove("open");
+
+      firstCard.textContent = "❓";
+      secondCard.textContent = "❓";
+
+      firstCard = null;
+      secondCard = null;
+      locked = false;
+    }, 900);
+  }
+}
+
+startGame();
+</script>
+
+</body>
+</html>
